@@ -111,3 +111,68 @@
   - `id`, `name`, `count`, `체크상태`, `미정상태`
 
 - 하위 분류가 존재하면 `children`에 같은 형태의 데이터가 재귀 형태로 반복되게 설계하자
+
+# 컴포넌트 제작
+
+- 복잡한 컴포넌트를 설계할 때는 작은 컴포넌트를 시작으로 상위 컴포넌트로 올라가며 제작하는 **상향식**으로 제작하는 것이 좋다
+
+  - 상향식은 상위 컴포넌트의 형태에 얽매이지 않고 그 자체로 필요한 UI 요구사항만을 고려해 만들 수 있음
+
+  - UI 자체를 나타내는 컴포넌트 이름을 지을 수 있다. => 이름을 더 잘 지을 수 있음
+
+## 내부 아이템 컴포넌트 의존성 없애기
+
+- **BAD**
+  
+  ```typescript
+  import CheckboxItem from './CheckboxItem.tsx';
+
+  const NextedCombobox = () => (
+    <Combobox>
+      {items.map((item) => <CheckboxItem item={item} >)}
+    </Combobox>
+  )
+  ```
+  
+  - 얼핏 보면 문제 없는 코드 (사실 대부분은 이렇게 컴포넌트를 설계할 것이다)
+  - 하지만 이 방식은, `<NestedCombobox />`가 `<CheckboxItem />`에 의존하게 된다
+  - 콤보박스에 다른 컴포넌트를 사용할 수 없음
+  - **유연함이 사라진다**
+
+- **SOSO** 
+
+  ```typescript
+  const NextedCombobox = (renderItem) => (
+    <Combobox>
+      {items.map((item) => renderItem(item))}
+    </Combobox>
+  )
+  ```
+  
+  - `<CheckboxItem />`을 그려주는 역할을 `<NestedCombobox />` 외부로 빼줌
+  - 어떤 아이템이 와도 `<NestedCombobox />` 외부에 만든 뒤, `renderItem` 함수를 통해 그리자
+  - 하지만... `items`가 아직 의존성임
+  - type때문에!
+
+- **GOOD**
+
+  - 위의 `items`는, 자연스럽게 `CheckboxItemData` 타입이 된다.
+  - 이렇게 하면 다양한 Item들이 오지 못함
+  - 따라서 중첩 콤보박스 내부에서 사용할 제너럴한 아이템 타입을 새로 정의해야 함
+
+  ```typescript
+  type ComboboxItem = {
+    id: string;
+    children?: ComboboxItem[];
+  }
+  
+  const NextedCombobox = (renderItem) => (
+    <Combobox>
+      {items.map((item) => renderItem(item.id))} <- item의 id를 넘김
+    </Combobox>
+  )
+  ```
+  
+  - `<NestedCombobox />` 컴포넌트 내부에서 정의한 제너럴한 콤보박스 아이템 타입!
+  - `id`와 `children` 데이터만 있으면 어떤 종류의 아이템 컴포넌트도 그릴 수 있는 유연한 중첩 콤보박스 컴포넌트가 된다. 
+
