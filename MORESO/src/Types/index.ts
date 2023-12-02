@@ -2,7 +2,7 @@ export type CheckboxItemData = {
   id: string;
   name: string;
   isChecked: boolean;
-  isIndeterminated: boolean;
+  isIndeterminate: boolean;
   count: number;
   children?: CheckboxItemData[];
 }
