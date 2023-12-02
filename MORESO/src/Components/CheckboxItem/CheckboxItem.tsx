@@ -1,6 +1,7 @@
 import * as S from './CheckboxItem.styled';
 import Checkbox from '@mui/material/Checkbox';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import React from "react";
 
 type CheckboxTextWithCountItem = {
   id: string;
